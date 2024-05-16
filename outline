@@ -1,0 +1,14 @@
+Mint($pattern)
+- print($pattern)
+    - exportNode($tree) [$tree = this->patterns[$pattern]]
+        - exportNodeSymbol($node)
+        - exportNodeConstructor($node)
+            - exportParameterBlocks($nodes, $params, $reflect)
+                - exportNodeSymbol($node)
+                - exportNodeConstructor($node)
+                - <recurse through $params>
+        - <recurse through $node->nodes>
+    - getImprintNameSpace()
+- getImprintDir()
+- <write_bytes>
+- <recurse through $pattern>
