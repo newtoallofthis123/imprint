@@ -1,31 +1,37 @@
 #include "imprint.h"
-#include <iostream>
+#include <sstream>
 
-void Imprint::parse(const std::string &xml) {
-  char c;
-  for (int i = 0; i < xml.length(); i++) {
-    c = xml[i];
-    if (c == '\n' || c == '\t' || c == ' ')
-      continue;
-    if (c == '<') {
-      if (!buffer.empty()) {
-        std::cout << "c: " << buffer << std::endl;
-        buffer.clear();
-      }
-      inEle = true;
-    } else if (c == '>') {
-      inEle = false;
-      if (!buffer.empty()) {
-        if (buffer[0] == '/') {
-          auto name = buffer.substr(1);
-          std::cout << "e: </" << buffer.substr(1) << ">" << std::endl;
-        } else {
-          std::cout << "s: <" << buffer << ">" << std::endl;
+// Parses a xml string to actual xml using a SAX like parsing method
+XML *Imprint::parse() {
+  root = new XML("");
+  current = root;
+  std::string line;
+  while (std::getline(input, line)) {
+    parse_line(line);
+  }
+  return root;
+}
+
+void Imprint::parse_line(const std::string &line) {
+  std::istringstream iss(line);
+  std::string token;
+  while (iss >> token) {
+    if (token[0] == '<') {
+      if (token[1] == '/') {
+        stack.pop();
+        if (!stack.empty()) {
+          current = stack.top();
         }
-        buffer.clear();
+      } else {
+        std::string tagName = token.substr(1, token.size() - 1);
+        XML *child = new XML(tagName);
+        current->nodes.push_back(child);
+        stack.push(child);
+        current = child;
       }
     } else {
-      buffer += c;
+      // if (current)
+        current->content += token + " ";
     }
   }
 }

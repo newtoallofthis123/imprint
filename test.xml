@@ -1,5 +1,6 @@
-<p [@ A @] >Hello World</p>
-<h1>Wow!</h1>
 <div [@ B @]>
+    <p>
+        <span> Wow </span>
+    </p>
     <p>Hi World</p>
 </div>

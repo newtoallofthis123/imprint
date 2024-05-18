@@ -1,11 +1,12 @@
 #include "imprint.h"
 #include <fstream>
+#include <functional>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <string>
 
 int main() {
-  Imprint ip;
 
   std::ifstream file("test.xml");
 
@@ -16,7 +17,24 @@ int main() {
 
   std::cout << "__Imprint__" << std::endl;
   std::cout << std::endl;
-  ip.parse(fileContents);
+  std::istringstream is(fileContents);
+  Imprint ip(is);
+  auto out = ip.parse();
+
+  // std::function<void(const XML &, int)> printXML = [&](const XML &xml,
+  //                                                      int depth) {
+  //   std::string indent(depth * 2, ' ');
+  //   std::cout << indent << "Tag: " << xml.tag << "\n";
+  //   std::cout << indent << "Content: " << xml.content << "\n";
+  //   for (const auto &child : xml.nodes) {
+  //     printXML(*child, depth + 1);
+  //   }
+  // };
+  //
+  // printXML(*out, 0);
+
+  std::cout << out->nodes[0]->tag << std::endl;
+  std::cout << out->nodes[0]->nodes[0]->tag << std::endl;
 
   return 0;
 }
