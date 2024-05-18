@@ -11,15 +11,15 @@ void Imprint::parse(XML &node, const std::string &xml) {
         parse(newNode, buffer);
       }
     }
-    if (c == '<') {
+    if (c == Token::OPEN_TAG) {
       if (!buffer.empty()) {
         // the actual content
         node.content = buffer;
         buffer.clear();
       }
-    } else if (c == '>') {
+    } else if (c == Token::OPEN_CLOSE) {
       if (!buffer.empty()) {
-        if (buffer[0] == '/') {
+        if (buffer[0] == Token::CLOSE_SLASH) {
           // end tag
           depth--;
         } else {
