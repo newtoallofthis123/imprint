@@ -1,28 +1,34 @@
 #include "imprint.h"
-#include <iostream>
 
-void Imprint::parse(const std::string &xml) {
-  char c;
-  for (int i = 0; i < xml.length(); i++) {
-    c = xml[i];
+void Imprint::parse(XML &node, const std::string &xml) {
+  for (auto c : xml) {
     if (c == '\n' || c == '\t' || c == ' ')
       continue;
+    if (depth == 0) {
+      inTag = false;
+      if (!buffer.empty()) {
+        auto newNode = XML("");
+        parse(newNode, buffer);
+      }
+    }
     if (c == '<') {
       if (!buffer.empty()) {
-        std::cout << "c: " << buffer << std::endl;
+        // the actual content
+        node.content = buffer;
         buffer.clear();
       }
-      inEle = true;
     } else if (c == '>') {
-      inEle = false;
       if (!buffer.empty()) {
         if (buffer[0] == '/') {
-          auto name = buffer.substr(1);
-          std::cout << "e: </" << buffer.substr(1) << ">" << std::endl;
+          // end tag
+          depth--;
         } else {
-          std::cout << "s: <" << buffer << ">" << std::endl;
+          // start tag
+          inTag = true;
+          depth++;
         }
-        buffer.clear();
+        if (!inTag)
+          buffer.clear();
       }
     } else {
       buffer += c;

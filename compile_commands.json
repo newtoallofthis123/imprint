@@ -1,0 +1,15 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-o",
+      "./bin/main",
+      "main.cpp"
+    ],
+    "directory": "/home/noobscience/approach/template_render",
+    "file": "/home/noobscience/approach/template_render/main.cpp",
+    "output": "/home/noobscience/approach/template_render/bin/main"
+  }
+]
