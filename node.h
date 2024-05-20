@@ -1,4 +1,11 @@
 #include "container.h"
 
-class Node : public Container {
+namespace Approach
+{
+    namespace Render
+    {
+        class Node : public Container
+        {
+        };
+    };
 };
