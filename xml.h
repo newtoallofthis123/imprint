@@ -27,7 +27,7 @@ namespace Approach
 {
   namespace Render
   {
-    class XML : public Node
+    class XML : Node
     {
     private:
       ProcUnit ActiveRenderCount = 0;
@@ -61,7 +61,7 @@ namespace Approach
 
       /* Strict Typing */
 
-      XML(const std::string &_tag)
+      XML(const std::string &_tag) 
       throw() : tag(_tag) { XML::SetRenderID(); }
       XML(const std::string &_tag, const std::string &_id)
       throw() : tag(_tag), id(_id) { XML::SetRenderID(); }
@@ -69,6 +69,21 @@ namespace Approach
           std::vector<std::string> &_classes)
       throw() : tag(_tag), id(_id), classes(_classes) { XML::SetRenderID(); }
       XML(const std::string &_tag, const std::string &_id,
+          std::vector<std::string> &_classes,
+          std::map<std::string, std::string> &_attributes)
+      throw() : tag(_tag), id(_id), classes(_classes), attributes(_attributes)
+      {
+        XML::SetRenderID();
+      }
+
+      XML(std::string &_tag)
+      throw() : tag(_tag) { XML::SetRenderID(); }
+      XML(std::string &_tag, std::string &_id)
+      throw() : tag(_tag), id(_id) { XML::SetRenderID(); }
+      XML(std::string &_tag, std::string &_id,
+          std::vector<std::string> &_classes)
+      throw() : tag(_tag), id(_id), classes(_classes) { XML::SetRenderID(); }
+      XML(std::string &_tag, std::string &_id,
           std::vector<std::string> &_classes,
           std::map<std::string, std::string> &_attributes)
       throw() : tag(_tag), id(_id), classes(_classes), attributes(_attributes)
@@ -244,4 +259,5 @@ namespace Approach
       }
     };
   };
+
 };

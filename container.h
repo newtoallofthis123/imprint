@@ -13,7 +13,7 @@ namespace Approach
     class Container : public Stream
     {
     public:
-      std::vector<Container *> nodes;
+      std::vector<Stream *> nodes;
       std::vector<std::string> _node_labels;
       std::vector<int> _labeled_nodes;
       std::string content;
@@ -31,17 +31,17 @@ namespace Approach
         this->RenderTail(stream);
       }
 
-      Container *offsetGet(std::string label)
+      Stream *offsetGet(std::string label)
       {
         auto index = getNodeLabelIndex(label);
         return getLabeledNode(index);
       }
 
-      void offsetSet(std::string label, Container *obj)
+      void offsetSet(std::string label, Stream *obj)
       {
         auto offset = getNodeLabelIndex(label);
 
-        this->nodes.push_back(static_cast<Container *>(obj));
+        this->nodes.push_back(obj);
 
         // if (offset == -1) {
         //   if (_labeled_nodes.empty()) {
@@ -69,7 +69,7 @@ namespace Approach
         }
       }
 
-      Container *getLabeledNode(int label_index)
+      Stream *getLabeledNode(int label_index)
       {
         return this->nodes[_labeled_nodes[label_index]];
       }
@@ -86,6 +86,88 @@ namespace Approach
           return -1;
         }
       }
+
+      // add << operator to add a node to the container
+      inline Container &operator<<(Stream &node)
+      {
+        this->nodes.push_back(&node);
+        return *this;
+      }
+      inline friend Container &operator<<(Stream &node, Container &to)
+      {
+        to.nodes.push_back(&node);
+        return to;
+      }
+
+      // add << operator to add a node to the container
+      inline Container &operator<<(Stream *node)
+      {
+        this->nodes.push_back(node);
+        return *this;
+      }
+
+      inline friend Container &operator<<(Stream *node, Container &to)
+      {
+        to.nodes.push_back(node);
+        return to;
+      }
+
+      /** Supports "normal" syntax cout<<XML; is not really a member function */
+      inline friend Stream &operator<<(Container &to, Container &node)
+      {
+        to.nodes.push_back(&node);
+        return to;
+      }
+
+
+      /* Typecast from XML to Node by calling XML.render() into Node.content */
+
+      inline operator std::string()
+      {
+        std::ostringstream stream;
+        this->prerender(stream);
+        return stream.str();
+      }
+
+      inline operator const char *()
+      {
+        std::ostringstream stream;
+        this->prerender(stream);
+        return stream.str().c_str();
+      }
+
+      // Make typecasts friendly
+
+      inline friend Container &operator<<(Container &to, std::string &node)
+      {
+        to.content += node;
+        return to;
+      }
+
+      inline friend Container &operator<<(Container &to, const char *node)
+      {
+        to.content += node;
+        return to;
+      }
+
+
     };
   };
 };
+
+/*
+  Add friend << operator to add a node to the container
+*/
+
+Stream &operator<<(Approach::Render::Container &container, Stream &node)
+{
+  container.nodes.push_back(&node);
+  return node;
+}
+
+Stream &operator<<(Approach::Render::Container &container, Stream *node)
+{
+  container.nodes.push_back(node);
+  return *node;
+}
+
