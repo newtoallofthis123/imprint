@@ -30,6 +30,8 @@ public:
   std::string tag, id;
   std::map<std::string, std::string> attributes;
   std::vector<std::string> classes;
+  std::vector<XML *> nodes;
+  std::string content;
 
   // Set Unique Global Render ID based on static member ActiveRenderCount
   inline const void SetRenderID() {
