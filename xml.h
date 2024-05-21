@@ -27,7 +27,7 @@ namespace Approach
 {
   namespace Render
   {
-    class XML : Node
+    class XML : public Node
     {
     private:
       ProcUnit ActiveRenderCount = 0;
