@@ -58,6 +58,13 @@ public:
     }
   }
 
+  // enable s["label"] = new Stream();
+  Stream *operator[](std::string label) { return offsetGet(label); }
+  // enable s[0] = new Stream();
+  Stream *operator[](int index) { return this->nodes[index]; }
+  // enable setting s[0] = new Stream();
+  void operator=(Stream *node) { this->nodes.push_back(node); }
+
   // add << operator to add a node to the container
   inline Container &operator<<(Stream &node) {
     this->nodes.push_back(&node);
