@@ -3,9 +3,11 @@
 namespace Approach {
 namespace Render {
 class Imprint {
+public:
   Node pattern;
   string output;
-  static int count;
+  int count;
+  int depth = 1;
   std::map<Node *, string> names;
   Imprint(Node pattern) : pattern(pattern) {}
   Imprint() : pattern(Node()) {}
@@ -22,39 +24,55 @@ class Imprint {
     }
   }
 
+  string add_depth() {
+    string str = "";
+    for (int i = 0; i < depth; i++) {
+      str = '\t' + str;
+    }
+    return str;
+  }
+
   string export_constructor(Node *pattern) {
     string exported;
     auto xml = static_cast<XML *>(pattern);
     auto name = get_name(pattern);
     exported += "public:\n";
-    exported += "std::map<ProcUnit, void *> " + name + "_options;\n";
+    exported +=
+        add_depth() + "std::map<ProcUnit, void *> " + name + "_options;\n";
 
     if (xml->tag != "") {
-      exported += name + "_options[Option::tag] = new std::string(\"" +
-                  xml->tag + "\");\n";
+      exported += add_depth() + name +
+                  "_options[Option::tag] = new std::string(\"" + xml->tag +
+                  "\");\n";
     }
     if (xml->id != "") {
-      exported += name + "_options[Option::id] = new std::string(\"" + xml->id +
+      exported += add_depth() + name +
+                  "_options[Option::id] = new std::string(\"" + xml->id +
                   "\");\n";
     }
     if (xml->attributes.size() > 0) {
-      exported += "std::map<std::string, std::string> attributes;\n";
+      exported +=
+          add_depth() + "std::map<std::string, std::string> attributes;\n";
       for (auto &attr : xml->attributes) {
-        exported +=
-            "attributes[\"" + attr.first + "\"] = \"" + attr.second + "\";\n";
+        exported += add_depth() + "attributes[\"" + attr.first + "\"] = \"" +
+                    attr.second + "\";\n";
       }
-      exported += name + "_options[Option::attributes] = &attributes;\n";
+      exported +=
+          add_depth() + name + "_options[Option::attributes] = &attributes;\n";
     }
     if (xml->classes.size() > 0) {
-      exported += "std::vector<std::string> classes;\n";
+      exported += add_depth() + "std::vector<std::string> classes;\n";
       for (auto &cls : xml->classes) {
-        exported += name + "_classes.push_back(\"" + cls + "\");\n";
+        exported +=
+            add_depth() + name + "_classes.push_back(\"" + cls + "\");\n";
       }
-      exported += name + "_options[Option::classes] = &classes;\n";
+      exported +=
+          add_depth() + name + "_options[Option::classes] = &classes;\n";
     }
 
     if (xml->content != "") {
-      exported += name + "_options[Option::content] = new std::string(\"" +
+      exported += add_depth() + name +
+                  "_options[Option::content] = new std::string(\"" +
                   xml->content + "\");\n";
     }
 
@@ -63,7 +81,7 @@ class Imprint {
 
   string export_symbol(Node *pattern) {
     auto name = get_name(pattern);
-    return "XML *" + name + " = new XML(" + name + "_options);\n";
+    return add_depth() + "XML *" + name + " = new XML(" + name + "_options);\n";
   }
 
   // convert to string such that the
@@ -71,13 +89,13 @@ class Imprint {
   // TODO:
   string print(Node *pattern) {
     string exported;
-    if (pattern->nodes.size() == 0) {
-      // actual printing
-      exported += export_constructor(pattern);
-      exported += export_symbol(pattern);
-    }
+    // if (pattern->nodes.size() == 0) {
+    // actual printing
+    exported += export_constructor(pattern);
+    exported += export_symbol(pattern);
+    // }
 
-    return "";
+    return exported;
   }
 
   string export_prefix() {

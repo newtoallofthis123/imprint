@@ -18,8 +18,6 @@ namespace Approach
 {
   namespace Render
   {
-
-
     class Imprint : public Approach::Render::Container
     {
     public:
