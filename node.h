@@ -8,11 +8,12 @@ namespace Approach
         class Node : public Container
         {
             public:
-            string content;
-
-            Node(const string &content) : content(content){};
-            Node(string content) : content(content) {};
-            Node(): content("") {};
+            Node(const string content){
+                this->content = content;
+            };
+            Node(){
+                this->content = "";
+            };
         };
     };
 };
