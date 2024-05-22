@@ -14,7 +14,7 @@ public:
   ~Imprint() {}
 
   string get_name(Node *pattern) {
-    // TODO: Get the name based on the node
+    // FIXME: Wrong way to determine the name
     if (names.find(pattern) != names.end())
       return names[pattern];
     else {
@@ -36,7 +36,6 @@ public:
     string exported;
     auto xml = static_cast<XML *>(pattern);
     auto name = get_name(pattern);
-    exported += "public:\n";
     exported +=
         add_depth() + "std::map<ProcUnit, void *> " + name + "_options;\n";
 
@@ -61,13 +60,14 @@ public:
           add_depth() + name + "_options[Option::attributes] = &attributes;\n";
     }
     if (xml->classes.size() > 0) {
-      exported += add_depth() + "std::vector<std::string> classes;\n";
+      exported +=
+          add_depth() + "std::vector<std::string>" + name + "_classes;\n";
       for (auto &cls : xml->classes) {
         exported +=
             add_depth() + name + "_classes.push_back(\"" + cls + "\");\n";
       }
-      exported +=
-          add_depth() + name + "_options[Option::classes] = &classes;\n";
+      exported += add_depth() + name + "_options[Option::classes] = " + name +
+                  "_classes;\n";
     }
 
     if (xml->content != "") {
@@ -101,7 +101,7 @@ public:
   string export_prefix() {
     return "#include \"xml.h\"\n\n"
            "using namespace Approach::Render;\n\n"
-           "class Renderable {\n";
+           "int main() {\n";
   }
 
   string export_end() { return "};"; }
