@@ -32,7 +32,7 @@ public:
     return str;
   }
 
-  string export_constructor(Node *pattern) {
+  string exportParamBlock(Node *pattern) {
     string exported;
     auto xml = static_cast<XML *>(pattern);
     auto name = get_name(pattern);
@@ -50,14 +50,14 @@ public:
                   "\");\n";
     }
     if (xml->attributes.size() > 0) {
-      exported +=
-          add_depth() + "std::map<std::string, std::string> attributes;\n";
+      exported += add_depth() + "std::map<std::string, std::string> " + name +
+                  "_attributes;\n";
       for (auto &attr : xml->attributes) {
-        exported += add_depth() + "attributes[\"" + attr.first + "\"] = \"" +
-                    attr.second + "\";\n";
+        exported += add_depth() + name + "_attributes[\"" + attr.first +
+                    "\"] = \"" + attr.second + "\";\n";
       }
-      exported +=
-          add_depth() + name + "_options[Option::attributes] = &attributes;\n";
+      exported += add_depth() + name + "_options[Option::attributes] = &" +
+                  name + "_attributes;\n";
     }
     if (xml->classes.size() > 0) {
       exported +=
@@ -66,7 +66,7 @@ public:
         exported +=
             add_depth() + name + "_classes.push_back(\"" + cls + "\");\n";
       }
-      exported += add_depth() + name + "_options[Option::classes] = " + name +
+      exported += add_depth() + name + "_options[Option::classes] = &" + name +
                   "_classes;\n";
     }
 
@@ -76,24 +76,39 @@ public:
                   xml->content + "\");\n";
     }
 
+    exported += add_depth() + "XML " + name + " = XML(" + name + "_options);\n";
+
+    // TODO: Add recursive exportNodeSymbol call
+
     return exported;
   }
 
-  string export_symbol(Node *pattern) {
+  string exportNodeConstructor(Node *pattern) {
+    string exported;
     auto name = get_name(pattern);
-    return add_depth() + "XML *" + name + " = new XML(" + name + "_options);\n";
+
+    auto params = exportParamBlock(pattern);
+    exported += params;
+
+    return exported;
   }
 
-  // convert to string such that the
-  // children are printed before the parent
-  // TODO:
+  string exportNodeSymbol(Node *pattern) {
+    auto name = get_name(pattern);
+
+    string exported;
+    exported += exportNodeConstructor(pattern);
+
+    // TODO: Recursive call to exportNodeSymbol
+
+    return exported;
+  }
+
   string print(Node *pattern) {
     string exported;
-    if (pattern->nodes.size() == 0) {
-      // actual printing
-      exported += export_constructor(pattern);
-      exported += export_symbol(pattern);
-    }
+    // if (pattern->nodes.size() == 0) {
+    exported += exportNodeSymbol(pattern);
+    // }
 
     return exported;
   }
