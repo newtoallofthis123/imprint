@@ -89,11 +89,11 @@ public:
   // TODO:
   string print(Node *pattern) {
     string exported;
-    // if (pattern->nodes.size() == 0) {
-    // actual printing
-    exported += export_constructor(pattern);
-    exported += export_symbol(pattern);
-    // }
+    if (pattern->nodes.size() == 0) {
+      // actual printing
+      exported += export_constructor(pattern);
+      exported += export_symbol(pattern);
+    }
 
     return exported;
   }

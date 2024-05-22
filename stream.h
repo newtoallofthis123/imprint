@@ -24,22 +24,15 @@ using NativeStream = T;
 
 typedef unsigned long long int ProcUnit;
 
-namespace Approach
-{
-  namespace Render
-  {
-    class Stream
-    {
-    public:
-      template <typename StreamT>
-      void render(NativeStream<StreamT> &stream);
-      void render(std::ostream &stream);
-      template <typename StreamT>
-      void RenderHead(NativeStream<StreamT> &stream);
-      template <typename StreamT>
-      void RenderCorpus(NativeStream<StreamT> &stream);
-      template <typename StreamT>
-      void RenderTail(NativeStream<StreamT> &stream);
-    };
-  };
+namespace Approach {
+namespace Render {
+class Stream {
+public:
+  template <typename StreamT> void render(NativeStream<StreamT> &stream);
+  void render(std::ostream &stream);
+  template <typename StreamT> void RenderHead(NativeStream<StreamT> &stream);
+  template <typename StreamT> void RenderCorpus(NativeStream<StreamT> &stream);
+  template <typename StreamT> void RenderTail(NativeStream<StreamT> &stream);
 };
+}; // namespace Render
+}; // namespace Approach
