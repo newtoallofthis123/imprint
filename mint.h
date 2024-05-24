@@ -1,4 +1,5 @@
 #include "xml.h"
+#include <string>
 
 namespace Approach {
 namespace Render {
@@ -6,15 +7,16 @@ class Imprint {
 public:
   Node pattern;
   string output;
-  int count;
+  int count = 1;
   int depth = 1;
   std::map<Node *, string> names;
   Imprint(Node pattern) : pattern(pattern) {}
   Imprint() : pattern(Node()) {}
   ~Imprint() {}
 
+  // NOTE: Wrong way to determine the name
+  // To be fixed soon
   string get_name(Node *pattern) {
-    // FIXME: Wrong way to determine the name
     if (names.find(pattern) != names.end())
       return names[pattern];
     else {
@@ -32,10 +34,9 @@ public:
     return str;
   }
 
-  string exportParamBlock(Node *pattern) {
+  string exportParamBlock(Node *pattern, string name) {
     string exported;
     auto xml = static_cast<XML *>(pattern);
-    auto name = get_name(pattern);
     exported +=
         add_depth() + "std::map<ProcUnit, void *> " + name + "_options;\n";
 
@@ -66,7 +67,7 @@ public:
         exported +=
             add_depth() + name + "_classes.push_back(\"" + cls + "\");\n";
       }
-      exported += add_depth() + name + "_options[Option::classes] = &" + name +
+      exported += add_depth() + name + "_options[Option::classes] = " + name +
                   "_classes;\n";
     }
 
@@ -75,46 +76,52 @@ public:
                   "_options[Option::content] = new std::string(\"" +
                   xml->content + "\");\n";
     }
-
-    exported += add_depth() + "XML " + name + " = XML(" + name + "_options);\n";
-
-    // TODO: Add recursive exportNodeSymbol call
-
     return exported;
   }
 
-  string exportNodeConstructor(Node *pattern) {
+  string exportNodeConstructor(Node *pattern, string name) {
     string exported;
-    auto name = get_name(pattern);
-
-    auto params = exportParamBlock(pattern);
-    exported += params;
-
+    exported += "XML(" + name + "_options);\n";
     return exported;
   }
 
+  // NOTE: This is a temporary solution to export the symbol
+  // The actual implementation needs to me more aware
   string exportNodeSymbol(Node *pattern) {
     auto name = get_name(pattern);
-
     string exported;
-    exported += exportNodeConstructor(pattern);
+    exported += "XML " + name;
+    return exported;
+  }
 
-    // TODO: Recursive call to exportNodeSymbol
+  string exportNode(Node *pattern) {
+    auto symbol = exportNodeSymbol(pattern);
+    auto constructor = exportNodeConstructor(pattern, get_name(pattern));
+    auto params = exportParamBlock(pattern, get_name(pattern));
 
+    string child_exports;
+    for (auto &child : pattern->nodes) {
+      child_exports += exportNode(static_cast<Node *>(child));
+    }
+
+    string exported = params + "\n" + add_depth() + symbol + " = " +
+                      constructor + "\n" + child_exports + "\n";
     return exported;
   }
 
   string print(Node *pattern) {
     string exported;
-    // if (pattern->nodes.size() == 0) {
-    exported += exportNodeSymbol(pattern);
-    // }
+    exported += exportNode(pattern);
 
     return exported;
   }
 
   string export_prefix() {
-    return "#include \"xml.h\"\n\n"
+    return "#include \"xml.h\"\n"
+           "#include <map>\n"
+           "#include <string>\n"
+           "#include <vector>\n"
+           "#include <iostream>\n"
            "using namespace Approach::Render;\n\n"
            "int main() {\n";
   }
