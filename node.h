@@ -5,8 +5,14 @@ namespace Render {
 using std::string;
 class Node : public Container {
 public:
-  Node(const string content) { this->content = content; };
-  Node() { this->content = ""; };
+  Node(const string content) {
+    this->content = content;
+    SetRenderID();
+  };
+  Node() {
+    this->content = "";
+    SetRenderID();
+  };
 };
 }; // namespace Render
 }; // namespace Approach

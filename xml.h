@@ -24,20 +24,10 @@ enum {
 namespace Approach {
 namespace Render {
 class XML : public Node {
-private:
-  ProcUnit ActiveRenderCount = 0;
-
 public:
-  ProcUnit RenderID;
   std::string tag, id;
   std::map<std::string, std::string> attributes;
   std::vector<std::string> classes;
-
-  // Set Unique Global Render ID based on static member ActiveRenderCount
-  inline const void SetRenderID() {
-    RenderID = ActiveRenderCount;
-    ++ActiveRenderCount;
-  }
 
   /************************
    *   CONSTRUCTORS        *
@@ -80,6 +70,8 @@ public:
   }
 
   /* Mixed Typing */
+
+  XML() { XML::SetRenderID(); }
 
   XML(const std::string &_tag, std::map<ProcUnit, void *> options)
   throw() : tag(_tag) {

@@ -10,11 +10,21 @@ namespace Approach {
 namespace Render {
 // The container class
 class Container : public Stream {
+private:
+  ProcUnit ActiveRenderCount = 0;
+
 public:
+  ProcUnit RenderID;
   std::vector<Stream *> nodes;
   std::vector<std::string> _node_labels;
   std::vector<int> _labeled_nodes;
   std::string content;
+
+  // Set Unique Global Render ID based on static member ActiveRenderCount
+  inline const void SetRenderID() {
+    RenderID = ActiveRenderCount;
+    ++ActiveRenderCount;
+  }
 
   void render(std::ostream &stream) {
     this->RenderHead(stream);
