@@ -1,25 +1,24 @@
-#include "mint.h"
+#include "imprint.h"
+#include <fstream>
 #include <string>
 using namespace Approach::Render;
 
 int main() {
-  XML x("h1");
-  x.id = "header";
-  x.content = "Hello, World!";
+  // read test.xml to a string
+  std::ifstream file("test.xml");
 
-  XML y("p");
-  y.id = "paragraph";
+  std::string xml;
+  std::string line;
+  while (std::getline(file, line)) {
+    xml += line;
+  }
 
-  XML z("a");
-  z.id = "link";
+  // create an Imprint object
+  Imprint i(xml);
 
-  y << z;
-  x << y;
+  auto x = i.parse();
 
-  Imprint m(x);
-  m.Mint(&x);
-
-  std::cout << m.output << std::endl;
+  std::cout << x->content << std::endl;  
 
   return 0;
 }

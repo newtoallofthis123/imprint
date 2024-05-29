@@ -19,8 +19,8 @@ namespace Render {
 class Imprint : public Approach::Render::Container {
 public:
   Container root;
-  std::string given_xml;
-  static stack<Container *> stack;
+  std::string xml;
+  stack<Container *> xmlStack;
 
   /**
     Recursively parse nodes and their contents
@@ -90,11 +90,12 @@ public:
       if (xml[pos] == control) {
         return pos;
       }
-      if (ignore_whitespace && xml[pos] == ' ' || xml[pos] == '\t' ||
-          xml[pos] == '\n' || xml[pos] == '\r') {
+      if (xml[pos] == ' ' || xml[pos] == '\t' || xml[pos] == '\n' ||
+          xml[pos] == '\r') {
         pos++;
         continue;
       };
+      pos++;
     }
     return pos;
   }
@@ -124,7 +125,6 @@ public:
     @param pos The position to start parsing from
     @return std::pair<int, int> The start and end positions of the opening tag
   */
-
   std::pair<int, int> seek_opening_tag(const std::string &xml, int pos) {
     int start = pos;
     while (pos < xml.length()) {
@@ -186,11 +186,12 @@ public:
     Render\Container, Render\XML are Render\Stream)
     @return The parsed tree
   */
-  void parse_pattern(const std::string &xml, int pos = 0, Container &parent) {
+  void parse_pattern(const std::string &xml, Container &parent, int pos = 0) {
     Node current;
-
     while (pos < xml.length()) {
       std::pair<int, int> tag = seek_opening_tag(xml, pos);
+      std::cout << tag.first << " " << tag.second << " : "
+                << xml.substr(tag.first, tag.second - tag.first) << std::endl;
 
       // Copy between the last position and the start of the tag into
       // current.content
@@ -201,27 +202,26 @@ public:
       std::string tag_name = extract_tag(xml, tag.first + 1);
       auto attrs = extract_attrs(xml, tag.first, tag.second);
       XML *pattern_node = new XML(tag_name);
-      parent << pattern_node;
+      (XML &)parent << pattern_node;
 
       // Recurse into the new node
-      stack.push(pattern_node);
-      parse_pattern(xml, tag.second, &pattern_node);
-      stack.pop(pattern_node);
+      // xmlStack.push(pattern_node);
+      parse_pattern(xml, *pattern_node, tag.second);
+      // xmlStack.pop();
 
       // Move the position to the end of the tag
       pos = tag.second;
+      pos++;
     }
   }
 
 public:
-  Stream stack;
-
   /**
     Imprint - Constructor
 
     @param xml The XML string to parse
   */
-  Imprint(const std::string &xml) : given_xml(xml) {}
+  Imprint(const std::string &xml) : xml(xml) {}
 
   /**
     parse - Parse the XML string
@@ -229,7 +229,7 @@ public:
     @return The root container
   */
   Container *parse() {
-    parse_pattern(given_xml, 0, root);
+    parse_pattern(xml, root);
     return &root;
   }
 
@@ -292,18 +292,31 @@ public:
     @return std::vector<std::pair<std::string, std::string>> The attributes of
     the tag
   */
+  bool first_attr = true;
+
   std::vector<std::pair<std::string, std::string>>
   extract_attrs(const std::string &xml, int start, int end) {
     std::vector<std::pair<std::string, std::string>> attrs;
     int pos = start;
+
     while (pos < end) {
-      if (xml[pos] == ' ') {
+      if (xml[pos] == ' ' || xml[pos] == '\t' || xml[pos] == '\n' ||
+          xml[pos] == '\r') {
         pos++;
         continue;
       }
+
+      if (xml[pos] == '>') {
+        pos++;
+        break;
+      }
+
       int attr_start = pos;
       pos = parse_until(xml, pos, '=', true);
       std::string attr_name = xml.substr(attr_start, pos - attr_start);
+      if (first_attr) {
+        attr_name = attr_name.substr(attr_name.find_first_of(" \t\n\r") + 1);
+      }
       pos++;
       pos = parse_until(xml, pos, '"', true);
       pos++;
@@ -311,8 +324,10 @@ public:
       pos = parse_until(xml, pos, '"', false);
       std::string attr_val = xml.substr(attr_val_start, pos - attr_val_start);
       attrs.push_back(std::make_pair(attr_name, attr_val));
+      // std::cout << attr_name << " = " << attr_val << std::endl;
       pos++;
     }
+
     return attrs;
   }
 };

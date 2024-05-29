@@ -50,8 +50,8 @@ public:
 
   template <typename T> string get_class(T *stream) {
     registerClasses();
-    auto x_ptr = std::make_shared<T>();
-    return getStringFromInstance(x_ptr);
+    auto shared_v = std::make_shared<T>();
+    return getStringFromInstance(shared_v);
   }
 
   string exportNodeConstructor(Node *pattern) {
@@ -69,7 +69,7 @@ public:
     auto typeName = get_class(pattern);
     auto id = pattern->RenderID;
     string exported;
-    exported += typeName + " " + std::to_string(id) + ";";
+    exported += typeName + "_" + std::to_string(id) + ";";
     return exported;
   }
 

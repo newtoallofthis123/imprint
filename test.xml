@@ -1,5 +1,2 @@
-<div [@ B @]>
-    <p>Hi World</p>
-    <p>Hello World</p>
-    <p>World</p>
-</div>
+<Imprint:Pattern name="hello" type="HTML" Imprint:bind="document">
+</Imprint:Pattern>

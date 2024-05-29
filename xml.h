@@ -218,5 +218,4 @@ public:
   }
 };
 }; // namespace Render
-
 }; // namespace Approach
