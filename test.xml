@@ -1,2 +1,3 @@
 <Imprint:Pattern name="hello" type="HTML" Imprint:bind="document">
+    <div></div>
 </Imprint:Pattern>

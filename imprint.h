@@ -196,6 +196,7 @@ public:
       // Copy between the last position and the start of the tag into
       // current.content
       current.content += xml.substr(pos, tag.first - pos);
+      std::cout << "Content: " << current.content << std::endl;
       parent << current;
 
       // Create a new node with the tag name and attributes
@@ -205,9 +206,9 @@ public:
       (XML &)parent << pattern_node;
 
       // Recurse into the new node
-      // xmlStack.push(pattern_node);
+      xmlStack.push(pattern_node);
       parse_pattern(xml, *pattern_node, tag.second);
-      // xmlStack.pop();
+      xmlStack.pop();
 
       // Move the position to the end of the tag
       pos = tag.second;
@@ -299,7 +300,7 @@ public:
     std::vector<std::pair<std::string, std::string>> attrs;
     int pos = start;
 
-    while (pos < end) {
+    while (pos < end && pos < xml.length()) {
       if (xml[pos] == ' ' || xml[pos] == '\t' || xml[pos] == '\n' ||
           xml[pos] == '\r') {
         pos++;
@@ -313,7 +314,10 @@ public:
 
       int attr_start = pos;
       pos = parse_until(xml, pos, '=', true);
-      std::string attr_name = xml.substr(attr_start, pos - attr_start);
+
+      std::string attr_name = "";
+      if (pos - attr_start < xml.length())
+        attr_name = xml.substr(attr_start, pos - attr_start);
       if (first_attr) {
         attr_name = attr_name.substr(attr_name.find_first_of(" \t\n\r") + 1);
       }
@@ -322,7 +326,9 @@ public:
       pos++;
       int attr_val_start = pos;
       pos = parse_until(xml, pos, '"', false);
-      std::string attr_val = xml.substr(attr_val_start, pos - attr_val_start);
+      std::string attr_val;
+      if ((pos - attr_val_start) < xml.length() && attr_val_start < xml.length())
+        attr_val = xml.substr(attr_val_start, pos - attr_val_start);
       attrs.push_back(std::make_pair(attr_name, attr_val));
       // std::cout << attr_name << " = " << attr_val << std::endl;
       pos++;
