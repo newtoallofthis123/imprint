@@ -11,11 +11,6 @@ concept Store = requires(T t) {
   { t.size() } -> std::integral;
 };
 
-// template <typename T>
-// concept NativeStreamConcept = std::is_base_of_v<
-//     std::basic_ios<typename T::char_type, typename T::traits_type>,
-//     std::remove_pointer_t<T>>;
-
 template <typename T>
   requires std::is_base_of<
                std::basic_ios<typename T::char_type, typename T::traits_type>,

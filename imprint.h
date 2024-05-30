@@ -1,6 +1,3 @@
-#ifndef IMPRINT_H
-#define IMPRINT_H
-
 #include "xml.h"
 #include <stack>
 #include <string>
@@ -21,6 +18,13 @@ public:
   Container root;
   std::string xml;
   stack<Container *> xmlStack;
+
+  Imprint(const std::string &xml) : xml(xml) {}
+
+  Container *parse() {
+    parse_pattern(xml, root);
+    return &root;
+  }
 
   /**
     Recursively parse nodes and their contents
@@ -193,13 +197,10 @@ public:
       std::cout << tag.first << " " << tag.second << " : "
                 << xml.substr(tag.first, tag.second - tag.first) << std::endl;
 
-      // Copy between the last position and the start of the tag into
-      // current.content
       current.content += xml.substr(pos, tag.first - pos);
       std::cout << "Content: " << current.content << std::endl;
       parent << current;
 
-      // Create a new node with the tag name and attributes
       std::string tag_name = extract_tag(xml, tag.first + 1);
       auto attrs = extract_attrs(xml, tag.first, tag.second);
       XML *pattern_node = new XML(tag_name);
@@ -216,83 +217,6 @@ public:
     }
   }
 
-public:
-  /**
-    Imprint - Constructor
-
-    @param xml The XML string to parse
-  */
-  Imprint(const std::string &xml) : xml(xml) {}
-
-  /**
-    parse - Parse the XML string
-
-    @return The root container
-  */
-  Container *parse() {
-    parse_pattern(xml, root);
-    return &root;
-  }
-
-  /**
-    parse_pattern - Parse A Pattern File
-
-    1. Seek through string until the start and end of an opening tag are found
-      a. Extract the tag name from the opening tag substring
-      b. Extract the attributes from the opening tag substring
-      c. Create a new Render\XML node wi tag name and attributes
-          i) IF the tag has a valid namespace
-          ii) ELSE create plain Render\Node
-      d. Push the created node to the parent (starts at root Container)
-      e. Fill the created node with following contents until next namespaced
-  node
-    2. Detect the end of the tag
-      a. IF the tag is self-closing, continue to the next tag
-      b. ELSE recurse until the end of the tag is found
-
-    Note: the Approach::Render types do not have a parent pointer, so we must
-  track it during recursion Note: use the above helper functions to make this
-  easier REMINDER: node->parent does not exist. Use current << child; knowing
-  that the previous call's current is the parent therefore "parent" is the
-  parent of the current node
-
-    @param xml The string to parse
-    @param pos The position to start parsing from
-    @param parent The parent Stream reference to attach to (all Render\Node,
-  Render\Container, Render\XML are Render\Stream)
-    @return The parsed tree
-  * /
-  void parse_pattern(const std::string &xml, int pos = 0, XML &parent)
-  {
-    Node current("");
-
-    while (pos < xml.length())
-    {
-      std::pair<int, int> tag = seek_opening_tag(xml,
-
-      stack.push(node);
-      parse_pattern(xml, pos, node);
-      stack.pop(node);
-
-      // std::string tag_name = extract_tag(xml, tag.first + 1);
-      // std::string tag_attributes = xml.substr(tag.first, tag.second -
-  tag.first);
-      // XML node(tag_name, tag_attributes);
-      // parent << node;
-      // pos = tag.second;
-    }
-  }
-  */
-
-  /**
-    extract_attrs - Extract the attributes from an opening tag
-
-    @param xml The string to parse
-    @param start The start position of the opening tag
-    @param end The end position of the opening tag
-    @return std::vector<std::pair<std::string, std::string>> The attributes of
-    the tag
-  */
   bool first_attr = true;
 
   std::vector<std::pair<std::string, std::string>>
@@ -327,10 +251,10 @@ public:
       int attr_val_start = pos;
       pos = parse_until(xml, pos, '"', false);
       std::string attr_val;
-      if ((pos - attr_val_start) < xml.length() && attr_val_start < xml.length())
+      if ((pos - attr_val_start) < xml.length() &&
+          attr_val_start < xml.length())
         attr_val = xml.substr(attr_val_start, pos - attr_val_start);
       attrs.push_back(std::make_pair(attr_name, attr_val));
-      // std::cout << attr_name << " = " << attr_val << std::endl;
       pos++;
     }
 
@@ -339,5 +263,3 @@ public:
 };
 }; // namespace Render
 }; // namespace Approach
-
-#endif

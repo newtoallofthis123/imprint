@@ -8,7 +8,6 @@
 
 namespace Approach {
 namespace Render {
-// The container class
 class Container : public Stream {
 private:
   ProcUnit ActiveRenderCount = 0;
@@ -68,7 +67,6 @@ public:
     }
   }
 
-  // enable s["label"] = new Stream();
   Stream *operator[](std::string label) { return offsetGet(label); }
   // enable s[0] = new Stream();
   Stream *operator[](int index) { return this->nodes[index]; }
@@ -103,7 +101,6 @@ public:
   }
 
   /* Typecast from XML to Node by calling XML.render() into Node.content */
-
   inline operator std::string() {
     std::ostringstream stream;
     this->prerender(stream);
