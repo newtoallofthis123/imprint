@@ -18,7 +18,5 @@ int main() {
 
   auto x = i.parse();
 
-  // std::cout << x->content << std::endl;  
-
   return 0;
 }

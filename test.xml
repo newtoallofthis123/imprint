@@ -1,3 +1,6 @@
 <Imprint:Pattern name="hello" type="HTML" Imprint:bind="document">
-    <div></div>
+    <Component:Node type="render" name="hello">
+        <div>Hello World</div>
+    </Component:Node>
+    Hello World
 </Imprint:Pattern>

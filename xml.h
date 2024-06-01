@@ -4,27 +4,26 @@
 #include <string>
 #include <vector>
 
-namespace Option {
-enum {
-  id = 0,
-  tag,
-  attributes,
-  classes,
-  properties,
-  content,
-  data,
-  context,
-  binding,
-  component,
-  service,
-  message
-};
-};
-
 namespace Approach {
 namespace Render {
 class XML : public Node {
+
 public:
+  enum class Option : ProcUnit {
+    id = 0,
+    tag,
+    attributes,
+    // classes,
+    // properties,
+    content,
+    // data,
+    // context,
+    // binding,
+    // component,
+    // service,
+    // message
+  };
+
   std::string tag, id;
   std::map<std::string, std::string> attributes;
   std::vector<std::string> classes;
@@ -113,16 +112,16 @@ public:
   void SetOptions(std::map<ProcUnit, void *> options) {
     std::map<ProcUnit, void *>::iterator option;
     for (option = options.begin(); option != options.end(); ++option) {
-      switch (option->first) {
+      switch ((XML::Option)option->first) {
       case Option::tag:
         tag = *(std::string *)option->second;
         break;
       case Option::id:
         id = *(std::string *)option->second;
         break;
-      case Option::classes:
-        classes = *(std::vector<std::string> *)(option->second);
-        break;
+      // case Option::classes:
+      //   classes = *(std::vector<std::string> *)(option->second);
+      //   break;
       case Option::attributes:
         attributes = *(std::map<std::string, std::string> *)(option->second);
         break;

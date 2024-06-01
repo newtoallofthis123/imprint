@@ -1,5 +1,6 @@
-<Imprint:Node>
-    <div class="wow" id="[@ A @]">
-        <p> Hello World </p>
+<Component:Node type="render" name="hello"> 
+    <div>
+        <h1>Hello World</h1>
+        
     </div>
-</Imprint:Node>
+</Component:Node>
