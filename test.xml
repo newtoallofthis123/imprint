@@ -2,5 +2,7 @@
     <Component:Node type="render" name="hello">
         <div>Hello World</div>
     </Component:Node>
-    Hello World
+	<div>
+		Hello World
+	</div>
 </Imprint:Pattern>

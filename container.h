@@ -14,10 +14,8 @@ private:
 
 public:
   ProcUnit RenderID;
-  // std::vector<Stream *> nodes;
-  using NodeStream = std::variant<std::string, Approach::Render::Stream *>;
+  std::vector<Stream *> nodes;
 
-  std::vector<NodeStream> nodes;
   std::vector<std::string> _node_labels;
   std::vector<int> _labeled_nodes;
   std::string content;
@@ -39,7 +37,7 @@ public:
     this->RenderTail(stream);
   }
 
-  NodeStream *offsetGet(std::string label) {
+  Stream *offsetGet(std::string label) {
     auto index = getNodeLabelIndex(label);
     return getLabeledNode(index);
   }
@@ -57,8 +55,8 @@ public:
     }
   }
 
-  NodeStream *getLabeledNode(int label_index) {
-    return &this->nodes[_labeled_nodes[label_index]];
+  Stream *getLabeledNode(int label_index) {
+    return this->nodes[_labeled_nodes[label_index]];
   }
 
   int getNodeLabelIndex(std::string label) {
@@ -70,9 +68,9 @@ public:
     }
   }
 
-  NodeStream *operator[](std::string label) { return offsetGet(label); }
+  Stream *operator[](std::string label) { return offsetGet(label); }
   // enable s[0] = new Stream();
-  NodeStream *operator[](int index) { return &nodes[index]; }
+  Stream *operator[](int index) { return nodes[index]; }
   // enable setting s[0] = new Stream();
   void operator=(Stream *node) { this->nodes.push_back(node); }
 
@@ -121,7 +119,7 @@ public:
   // Make typecasts friendly
 
   inline friend Container &operator<<(Container &to, std::string &node) {
-    to.nodes.push_back(node);
+    to.content += node;
     return to;
   }
 

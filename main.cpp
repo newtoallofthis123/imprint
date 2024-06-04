@@ -18,5 +18,11 @@ int main() {
 
   auto x = i.parse();
 
+  std::cout << x->nodes.size() << std::endl;
+
+  auto y = (XML *)x->nodes[0];
+
+  std::cout << *y; 
+
   return 0;
 }

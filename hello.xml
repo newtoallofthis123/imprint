@@ -1,6 +1,5 @@
 <Component:Node type="render" name="hello"> 
     <div>
         <h1>Hello World</h1>
-        
     </div>
 </Component:Node>

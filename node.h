@@ -13,6 +13,16 @@ public:
     this->content = "";
     SetRenderID();
   };
+
+  inline friend Node &operator<<(Node &to, Node &node) {
+    to.nodes.push_back(&node);
+    return to;
+  }
+
+  inline friend Node &operator<<(Node &to, Node *node) {
+    to.nodes.push_back(node);
+    return to;
+  }
 };
 }; // namespace Render
 }; // namespace Approach

@@ -38,7 +38,8 @@ public:
   std::string extract_tag(const std::string &xml, int start) {
     int tag_start = xml.find('<', start) + 1;
     int tag_end = xml.find_first_of(" />", tag_start);
-    return xml.substr(tag_start, tag_end - tag_start);
+    auto tag = xml.substr(tag_start, tag_end - tag_start);
+    return tag;
   }
 
   /**
@@ -67,9 +68,8 @@ public:
   }
 
   int skip_whitespace(const std::string &xml, int pos) {
-    while (pos < xml.length() &&
-           (xml[pos] == ' ' || xml[pos] == '\t' || xml[pos] == '\n' ||
-            xml[pos] == '\r')) {
+    while (pos < xml.length() && (xml[pos] == ' ' || xml[pos] == '\t' ||
+                                  xml[pos] == '\n' || xml[pos] == '\r')) {
       pos++;
     }
     return pos;
@@ -196,14 +196,19 @@ public:
       if (start == -1) {
         std::cout << xml << std::endl;
         current = Node(xml);
+        std::cout << "here from simple" << std::endl;
         parent << current;
+        break;
       }
       pos = end;
       auto tag = extract_tag(xml, start);
-      if (!isValidPatternNamespace(tag)) {
-        current = Node(xml);
+      if (!isValidPatternNamespace(tag) &&
+          xml.substr(start, end - start).find("/") == std::string::npos) {
+        std::cout << "TAG: " << tag << std::endl;
+        current = Node(xml.substr(start, end - start));
+        std::cout << "here from invalid" << std::endl;
         parent << current;
-        continue;
+        break;
       }
       auto attrs = extract_attrs(xml, start, end);
       auto content = xml.substr(end, xml.find("</" + tag + ">", end) - end);
@@ -213,15 +218,15 @@ public:
       }
       if (isValidPatternNamespace(tag)) {
         XML xml = XML(tag);
-        xml.attributes = attrs;
+        // xml.attributes = attrs;
+        std::cout << "here from xml" << std::endl;
         parent << xml;
       }
       auto spilt_children = split_xml_children(content);
       for (auto e : spilt_children) {
         std::cout << "ELEMENT: " << e << std::endl;
         std::cout << "-v-" << std::endl;
-        parse_pattern(e, current, 0);
-        parent << current;
+        // parse_pattern(e, current);
       }
       std::cout << std::endl;
     }
