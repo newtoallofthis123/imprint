@@ -3,7 +3,7 @@
 #include <string>
 using namespace Approach::Render;
 
-int main() {
+/* int main() {
   // read test.xml to a string
   std::ifstream file("test.xml");
 
@@ -25,4 +25,10 @@ int main() {
   std::cout << *y; 
 
   return 0;
+} */
+
+int main(){
+  XML x("h1");
+
+  std::cout << x;
 }

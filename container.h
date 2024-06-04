@@ -37,36 +37,12 @@ public:
     this->RenderTail(stream);
   }
 
-  Stream *offsetGet(std::string label) {
-    auto index = getNodeLabelIndex(label);
-    return getLabeledNode(index);
-  }
+  Stream *offsetGet(std::string label);
+  void offsetSet(std::string label, Stream *obj);
 
-  void offsetSet(std::string label, Stream *obj) {
-    auto offset = getNodeLabelIndex(label);
+  Stream *getLabeledNode(int label_index);
 
-    this->nodes.push_back(obj);
-    if (offset == -1) {
-      _labeled_nodes.push_back(this->nodes.size() - 1);
-      _node_labels.push_back(label);
-    } else {
-      _labeled_nodes[offset] = this->nodes.size() - 1;
-      _node_labels[offset] = label;
-    }
-  }
-
-  Stream *getLabeledNode(int label_index) {
-    return this->nodes[_labeled_nodes[label_index]];
-  }
-
-  int getNodeLabelIndex(std::string label) {
-    auto offset = std::find(_node_labels.begin(), _node_labels.end(), label);
-    if (offset != _node_labels.end()) {
-      return offset - _node_labels.begin();
-    } else {
-      return -1;
-    }
-  }
+  int getNodeLabelIndex(std::string label);
 
   Stream *operator[](std::string label) { return offsetGet(label); }
   // enable s[0] = new Stream();
@@ -130,20 +106,3 @@ public:
 };
 }; // namespace Render
 }; // namespace Approach
-
-/*
-  Add friend << operator to add a node to the container
-*/
-inline Approach::Render::Stream &
-operator<<(Approach::Render::Container &container,
-           Approach::Render::Stream &node) {
-  container.nodes.push_back(&node);
-  return node;
-}
-
-inline Approach::Render::Stream &
-operator<<(Approach::Render::Container &container,
-           Approach::Render::Stream *node) {
-  container.nodes.push_back(node);
-  return *node;
-}

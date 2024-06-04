@@ -13,15 +13,7 @@ public:
     id = 0,
     tag,
     attributes,
-    // classes,
-    // properties,
     content,
-    // data,
-    // context,
-    // binding,
-    // component,
-    // service,
-    // message
   };
 
   std::string tag, id;
@@ -109,27 +101,7 @@ public:
    *       ACTIONS         *
    *                       */
 
-  void SetOptions(std::map<ProcUnit, void *> options) {
-    std::map<ProcUnit, void *>::iterator option;
-    for (option = options.begin(); option != options.end(); ++option) {
-      switch ((XML::Option)option->first) {
-      case Option::tag:
-        tag = *(std::string *)option->second;
-        break;
-      case Option::id:
-        id = *(std::string *)option->second;
-        break;
-      // case Option::classes:
-      //   classes = *(std::vector<std::string> *)(option->second);
-      //   break;
-      case Option::attributes:
-        attributes = *(std::map<std::string, std::string> *)(option->second);
-        break;
-      default: /* generic option call; */
-        break;
-      }
-    }
-  }
+  void SetOptions(std::map<ProcUnit, void *> options);
 
   /************************
    *   STREAM TO CLASS     *
@@ -149,62 +121,24 @@ public:
    *   RENDERING PIPELINE  *
    *                       */
 
-  inline void prerender(std::ostream &outputstream, const XML &object) {
-    this->RenderHead(outputstream);
-    this->RenderTail(outputstream);
-  }
-
-  inline void render(std::ostream &outputstream) {
-    this->RenderHead(outputstream);
-    this->RenderCorpus(outputstream);
-    this->RenderTail(outputstream);
-  }
+  void prerender(std::ostream &outputstream, const XML &object);
+  void render(std::ostream &outputstream);
 
   /** Outputs this node's tag, id and attributes to the stream. */
-  inline void RenderHead(std::ostream &outputstream) {
-    // stream opening tag
-    outputstream << std::endl << "<"; // open tag
-    if (!this->id.empty())
-      outputstream << this->tag << " id=\"" << this->id << "\"";
-    else
-      outputstream << this->tag;
-
-    // stream attributes
-    if (!this->attributes.empty()) // if node has attributes
-    {
-      for (std::map<std::string, std::string>::const_iterator attribute =
-               this->attributes.begin();
-           attribute != this->attributes.end();
-           ++attribute) // for each attribute
-      {
-        outputstream << " " << attribute->first << "=\"" << attribute->second
-                     << "\""; // output attribute to stream
-      }
-    }
-    outputstream << ">"; // close tag
-
-    if (!this->content.empty())
-      outputstream << std::endl << this->content << std::endl;
-  }
+  void RenderHead(std::ostream &outputstream);
 
   /** Outputs any child nodes to stream. */
-  inline void RenderCorpus(std::ostream &outputstream) {
-    if (!this->nodes.empty())
-      for (ProcUnit i = 0, L = this->nodes.size(); i < L; ++i) {
-        outputstream << *static_cast<XML *>(this->nodes[i]);
-      }
-  }
+  void RenderCorpus(std::ostream &outputstream);
 
   /** Outputs closing tag to stream. */
-  inline void RenderTail(std::ostream &outputstream) {
-    outputstream << std::endl << "</" << this->tag << ">";
-  }
+  void RenderTail(std::ostream &outputstream);
 
   /************************
    *   STREAM OPERATORS    *
    *                       */
 
-  /** Funky XML>>cout syntax, works in situations without the non-member friend
+  /** Funky XML>>cout syntax, works in situations without the non-member
+   * friend
    */
   inline void operator>>(std::ostream &outputstream) {
     this->render(outputstream);
