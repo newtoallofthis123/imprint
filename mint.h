@@ -147,26 +147,13 @@ public:
     return exported;
   }
 
-  string export_prefix() {
-    return "#include \"xml.h\"\n"
-           "#include <map>\n"
-           "#include <string>\n"
-           "#include <vector>\n"
-           "#include <iostream>\n"
-           "using namespace Approach::Render;\n\n"
-           "int main() {\n";
-  }
-
-  string export_end() { return "};"; }
-
   int Mint(Node *pattern) {
     string file = print(pattern);
-    file = export_prefix() + file + export_end();
     output = file;
     return 0;
   }
 
   void print() { std::cout << output << std::endl; }
 };
-} // namespace Render
+}; // namespace Render
 } // namespace Approach
