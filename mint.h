@@ -26,10 +26,10 @@ public:
     return str;
   }
 
-  // TODO:
-  string exportParameterBlocks(Node *pattern,
-                               std::map<ProcUnit, void *> parameters) {
-    string exported;
+  // TODO: Actually make this work
+  std::map<string, string>
+  exportParameterBlocks(Node *pattern, std::map<ProcUnit, void *> parameters) {
+    std::map<string, string> exported;
 
     std::map<ProcUnit, void *>::iterator option;
     for (option = parameters.begin(); option != parameters.end(); ++option) {
@@ -46,10 +46,18 @@ public:
   }
 
   std::pair<string, string> exportNodeConstructor(Node *pattern) {
-    string prepend;
+    string prepend, assignment;
     auto type = get_class(pattern);
 
+    // FIXME: This is wrong
+    std::map<ProcUnit, void *> options;
+    auto blocks = exportParameterBlocks(pattern, options);
+
     string statement = "new " + type + '(';
+
+    for (auto &block : blocks) {
+      statement += block.second + ',';
+    }
 
     // TODO: Add the options logic
 
@@ -126,6 +134,15 @@ public:
   string print(Node *pattern) {
     string exported;
     exported += exportNode(pattern);
+
+    auto content = "#include \"xml.h\"\n"
+                   "#include <map>\n"
+                   "#include <string>\n"
+                   "#include <vector>\n"
+                   "#include <iostream>\n"
+                   "using namespace Approach::Render;\n\n"
+                   "int main() {\n";
+    exported = content + exported + "};";
 
     return exported;
   }
