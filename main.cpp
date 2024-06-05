@@ -1,4 +1,4 @@
-#include "imprint.h"
+#include "mint.h"
 #include <fstream>
 #include <string>
 using namespace Approach::Render;
@@ -16,13 +16,14 @@ int main() {
   // create an Imprint object
   Imprint i(xml);
 
-  auto x = i.parse();
+  XML cn("Component:Node");
+  XML n("node");
+  n.content = "<div>hello</div>";
+  cn << &n;
 
-  std::cout << x->nodes.size() << std::endl;
+  std::cout << i.exportNodeSymbol(&n);
 
-  auto y = (XML *)x->nodes[0];
-
-  std::cout << *y; 
+  // auto x = i.Mint(&cn);
 
   return 0;
 }

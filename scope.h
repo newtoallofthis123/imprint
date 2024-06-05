@@ -52,9 +52,9 @@ getStringFromInstance(const std::shared_ptr<Stream> &instance) {
 }
 
 inline void registerClasses() {
-  Scope::getInstance().registerClass<XML>("XML");
-  Scope::getInstance().registerClass<Node>("Node");
-  Scope::getInstance().registerClass<Container>("Container");
+  Scope::getInstance().registerClass<Approach::Render::XML>("Approach::Render::XML");
+  Scope::getInstance().registerClass<Approach::Render::Node>("Approach::Render::Node");
+  Scope::getInstance().registerClass<Approach::Render::Container>("Approach::Render::Container");
 }
 } // namespace Render
 }; // namespace Approach

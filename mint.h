@@ -1,5 +1,6 @@
 #include "scope.h"
 #include <string>
+#include <utility>
 
 namespace Approach {
 namespace Render {
@@ -8,28 +9,18 @@ class Imprint {
 public:
   Node pattern;
   string output;
-  int count = 1;
-  int depth = 1;
-  std::map<Node *, string> names;
+  static int export_count;
+  static int export_depth;
+  std::map<string, int> generation_count;
+  std::map<ProcUnit, string> resolved_symbols;
+  std::map<ProcUnit, string> bound;
   Imprint(Node pattern) : pattern(pattern) {}
   Imprint() : pattern(Node()) {}
   ~Imprint() {}
 
-  // NOTE: Wrong way to determine the name
-  // To be fixed soon
-  string get_name(string typeName, Node *pattern) {
-    if (names.find(pattern) != names.end())
-      return names[pattern];
-    else {
-      names[pattern] = typeName + std::to_string(count);
-      count++;
-      return names[pattern];
-    }
-  }
-
   string add_depth() {
     string str = "";
-    for (int i = 0; i < depth; i++) {
+    for (int i = 0; i < export_depth; i++) {
       str = '\t' + str;
     }
     return str;
@@ -54,46 +45,78 @@ public:
     return getStringFromInstance(shared_v);
   }
 
-  string exportNodeConstructor(Node *pattern) {
-    string exported;
-    auto typeName = get_class(pattern);
-    auto name = get_name(typeName, pattern);
-    auto statement = typeName + "(" + name + "_options);\n";
+  std::pair<string, string> exportNodeConstructor(Node *pattern) {
+    string prepend;
+    auto type = get_class(pattern);
 
-    return exported + statement;
+    string statement = "new " + type + '(';
+
+    // TODO: Add the options logic
+
+    return std::make_pair(prepend, statement);
   }
 
-  // NOTE: This is a temporary solution to export the symbol
-  // The actual implementation needs to me more aware
   string exportNodeSymbol(Node *pattern) {
-    auto typeName = get_class(pattern);
-    auto id = pattern->RenderID;
-    string exported;
-    exported += typeName + "_" + std::to_string(id) + ";";
-    return exported;
+    auto type = get_class(pattern);
+    string typeName;
+
+    typeName = type.substr(type.find_last_of(":") + 1);
+
+    std::cout << pattern->RenderID << std::endl;
+
+    if (generation_count.find(typeName) == generation_count.end())
+      generation_count[typeName] = 0;
+
+    if (bound.find(pattern->RenderID) != bound.end()) {
+      resolved_symbols[pattern->RenderID] = bound[pattern->RenderID];
+    } else {
+      generation_count[typeName]++;
+    }
+
+    if (resolved_symbols.find(pattern->RenderID) == resolved_symbols.end()) {
+      resolved_symbols[pattern->RenderID] =
+          typeName + "_" + std::to_string(generation_count[typeName]);
+      generation_count[typeName]++;
+    }
+
+    return resolved_symbols[pattern->RenderID];
   }
 
   string exportNode(Node *pattern, Node *parent, string export_symbol) {
-    string symbol, constructor, append;
+    export_count = 0;
+    export_depth = 0;
+    export_depth++;
+    auto tabSpaces = add_depth();
+
+    string symbol;
     if (export_symbol == "") {
       symbol = exportNodeSymbol(pattern);
     } else {
-      symbol = exportNodeSymbol(pattern);
+      symbol = export_symbol;
     }
-    constructor = exportNodeConstructor(pattern);
+
+    bool append;
+
+    auto constructor = exportNodeConstructor(pattern);
 
     // TODO: Implement parent and symbol append logic
 
     string child_exports;
     for (auto &child : pattern->nodes) {
-      child_exports += exportNode(static_cast<Node *>(child), nullptr, symbol);
+      child_exports += exportNode((Node *)child, nullptr, symbol);
     }
 
-    string exported = "\n" + add_depth() + symbol + " = " + constructor + "\n" +
-                      child_exports + "\n";
+    export_depth--;
+
+    string exported;
+    exported += constructor.first + tabSpaces + symbol + " = " +
+                constructor.second + ';';
+    exported += child_exports;
+
     return exported;
   }
 
+  // Just to make it easier to call
   string exportNode(Node *pattern, Node *parent) {
     return exportNode(pattern, parent, "");
   }
