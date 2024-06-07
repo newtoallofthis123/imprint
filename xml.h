@@ -137,12 +137,12 @@ public:
 
   /** Nests child nodes into the instance by pointer */
   inline void operator<<(Node *object) {
-    this->nodes.push_back(static_cast<XML *>(object));
+    this->nodes.push_back((XML *)(object));
   }
 
   /** Nests child nodes into the instance by reference */
   inline void operator<<(Node &object) {
-    this->nodes.push_back(static_cast<XML *>(&object));
+    this->nodes.push_back((XML *)(&object));
   }
 
   /************************
@@ -172,7 +172,7 @@ public:
     // stream attributes
     if (!this->attributes.empty()) // if node has attributes
     {
-      for (std::map<std::string, std::string>::const_iterator attribute =
+      for (auto attribute =
                this->attributes.begin();
            attribute != this->attributes.end();
            ++attribute) // for each attribute
@@ -190,8 +190,8 @@ public:
   /** Outputs any child nodes to stream. */
   inline void RenderCorpus(std::ostream &outputstream) {
     if (!this->nodes.empty())
-      for (ProcUnit i = 0, L = this->nodes.size(); i < L; ++i) {
-        outputstream << *static_cast<XML *>(this->nodes[i]);
+      for (auto & node : this->nodes) {
+        outputstream << *(XML *)node;
       }
   }
 

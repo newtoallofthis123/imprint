@@ -9,7 +9,7 @@ public:
   enum class Option : ProcUnit {
     content,
   };
-  Node(const string content) {
+  explicit Node(const string &content) {
     this->content = content;
     SetRenderID();
   };
@@ -18,7 +18,7 @@ public:
     SetRenderID();
   };
 
-  Node(std::map<ProcUnit, void *> options) {
+  explicit Node(const std::map<ProcUnit, void *> &options) {
     Node::SetRenderID();
     SetOptions(options);
   }

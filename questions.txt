@@ -1,0 +1,12 @@
+About the $tree = $this->pattern line 828
+About the direct pattern in line 851
+Ask about append bool line 89
+Ask about bound line 801
+
+==MY CODE==
+
+Abstraction on line 19
+
+==OOO==
+
+Class file

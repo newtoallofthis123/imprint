@@ -1,6 +1,7 @@
 #include "xml.h"
 #include <stack>
 #include <string>
+#include <utility>
 #include <vector>
 
 using Approach::Render::Container;
@@ -19,7 +20,7 @@ public:
   std::string xml;
   stack<Container *> xmlStack;
 
-  Imprint(const std::string &xml) : xml(xml) {}
+  explicit Imprint(std::string xml) : xml(std::move(xml)) {}
 
   Container *parse() {
     parse_pattern(xml, root);
@@ -35,9 +36,9 @@ public:
     @param pos The position to start parsing from
     @return The tag or namespaced tag
   */
-  std::string extract_tag(const std::string &xml, int start) {
-    int tag_start = xml.find('<', start) + 1;
-    int tag_end = xml.find_first_of(" />", tag_start);
+  static std::string extract_tag(const std::string &xml, int start) {
+    size_t tag_start = xml.find('<', start) + 1;
+    size_t tag_end = xml.find_first_of(" />", tag_start);
     auto tag = xml.substr(tag_start, tag_end - tag_start);
     return tag;
   }
@@ -51,14 +52,14 @@ public:
     @param ignore_whitespace Whether to ignore whitespace
     @return The position of the control character or the end of the string
   */
-  int parse_until(const std::string &xml, int pos, char control,
-                  bool ignore_whitespace) {
+  static int parse_until(const std::string &xml, int pos, char control,
+                         bool ignore_whitespace) {
     while (pos < xml.length()) {
       if (xml[pos] == control) {
         return pos;
       }
-      if (xml[pos] == ' ' || xml[pos] == '\t' || xml[pos] == '\n' ||
-          xml[pos] == '\r') {
+      if ((ignore_whitespace && xml[pos] == ' ') || xml[pos] == '\t' ||
+          xml[pos] == '\n' || xml[pos] == '\r') {
         pos++;
         continue;
       };
@@ -67,7 +68,7 @@ public:
     return pos;
   }
 
-  int skip_whitespace(const std::string &xml, int pos) {
+  static size_t skip_whitespace(const std::string &xml, size_t pos) {
     while (pos < xml.length() && (xml[pos] == ' ' || xml[pos] == '\t' ||
                                   xml[pos] == '\n' || xml[pos] == '\r')) {
       pos++;
@@ -76,16 +77,16 @@ public:
   }
 
   /**
-    isValidPatternNamespace - Check if a tag has a valid namespace
+    is_valid_namespace - Check if a tag has a valid namespace
     Valid Namespaces: Approach, Imprint, Render, Component
 
     @param tag The tag to check
     @return bool Whether the tag has a valid namespace
   */
-  inline bool isValidPatternNamespace(const std::string &tag) {
+  static bool is_valid_namespace(const std::string &tag) {
     std::vector<std::string> namespaces = {"Approach", "Imprint", "Render",
                                            "Component"};
-    for (std::string ns : namespaces) {
+    for (const std::string &ns : namespaces) {
       if (tag.find(ns + ":") == 0) {
         return true;
       }
@@ -100,20 +101,20 @@ public:
     @param pos The position to start parsing from
     @return std::pair<int, int> The start and end positions of the opening tag
   */
-  std::pair<int, int> seek_opening_tag(const std::string &xml, int pos) {
-    int start = xml.find('<', pos);
+  static std::pair<int, int> seek_opening_tag(const std::string &xml, int pos) {
+    size_t start = xml.find('<', pos);
     if (start == std::string::npos) {
       return {-1, -1};
     }
-    int end = xml.find('>', start);
+    size_t end = xml.find('>', start);
     if (end == std::string::npos) {
       return {-1, -1};
     }
     return {start, end + 1};
   }
 
-  std::vector<std::string> split_xml_children(const std::string &input,
-                                              int pos = 0) {
+  static std::vector<std::string> split_xml_children(const std::string &input,
+                                                     size_t pos = 0) {
     std::vector<std::string> xml_children;
 
     while (pos < input.size()) {
@@ -124,30 +125,30 @@ public:
         break;
 
       if (input[pos] == '<') {
-        int start_tag_pos = pos;
-        int end_tag_pos = input.find('>', start_tag_pos);
+        auto start_tag_pos = pos;
+        size_t end_tag_pos = input.find('>', start_tag_pos);
         if (end_tag_pos == std::string::npos)
           break;
 
         std::string start_tag =
             input.substr(start_tag_pos + 1, end_tag_pos - start_tag_pos - 1);
-        int space_pos = start_tag.find(' ');
+        size_t space_pos = start_tag.find(' ');
         std::string tag_name = (space_pos == std::string::npos)
                                    ? start_tag
                                    : start_tag.substr(0, space_pos);
 
         std::string end_tag = "</" + tag_name + ">";
-        int end_tag_start_pos = input.find(end_tag, end_tag_pos);
+        size_t end_tag_start_pos = input.find(end_tag, end_tag_pos);
         if (end_tag_start_pos == std::string::npos)
           break;
 
-        int element_length =
+        size_t element_length =
             end_tag_start_pos + end_tag.length() - start_tag_pos;
         xml_children.push_back(input.substr(start_tag_pos, element_length));
 
         pos = end_tag_start_pos + end_tag.length();
       } else {
-        int text_end_pos = input.find('<', pos);
+        size_t text_end_pos = input.find('<', pos);
         if (text_end_pos == std::string::npos) {
           xml_children.push_back(input.substr(pos));
           break;
@@ -189,7 +190,8 @@ public:
     Render\Container, Render\XML are Render\Stream)
     @return The parsed tree
   */
-  void parse_pattern(const std::string &xml, Container &parent, int pos = 0) {
+  static void parse_pattern(const std::string &xml, Container &parent,
+                            int pos = 0) {
     Node current;
     while (pos < xml.length()) {
       auto [start, end] = seek_opening_tag(xml, pos);
@@ -202,8 +204,8 @@ public:
       }
       pos = end;
       auto tag = extract_tag(xml, start);
-      if (!isValidPatternNamespace(tag) &&
-          xml.substr(start, end - start).find("/") == std::string::npos) {
+      if (!is_valid_namespace(tag) &&
+          xml.substr(start, end - start).find('/') == std::string::npos) {
         std::cout << "TAG: " << tag << std::endl;
         current = Node(xml.substr(start, end - start));
         std::cout << "here from invalid" << std::endl;
@@ -213,17 +215,17 @@ public:
       auto attrs = extract_attrs(xml, start, end);
       auto content = xml.substr(end, xml.find("</" + tag + ">", end) - end);
       std::cout << "TAG: " << tag << std::endl;
-      for (auto [key, value] : attrs) {
+      for (const auto &[key, value] : attrs) {
         std::cout << "ATTR: " << key << " = " << value << std::endl;
       }
-      if (isValidPatternNamespace(tag)) {
-        XML xml = XML(tag);
-        // xml.attributes = attrs;
-        std::cout << "here from xml" << std::endl;
-        parent << xml;
+      if (is_valid_namespace(tag)) {
+        XML valid_xml = XML(tag);
+        // valid_xml.attributes = attrs;
+        std::cout << "here from valid_xml" << std::endl;
+        parent << valid_xml;
       }
       auto spilt_children = split_xml_children(content);
-      for (auto e : spilt_children) {
+      for (const auto &e : spilt_children) {
         std::cout << "ELEMENT: " << e << std::endl;
         std::cout << "-v-" << std::endl;
         // parse_pattern(e, current);
@@ -232,17 +234,17 @@ public:
     }
   }
 
-  std::map<std::string, std::string> extract_attrs(const std::string &xml,
-                                                   int start, int end) {
+  static std::map<std::string, std::string>
+  extract_attrs(const std::string &xml, int start, int end) {
     std::map<std::string, std::string> attributes;
-    int pos = xml.find_first_of(" ", start) + 1;
+    size_t pos = xml.find_first_of(' ', start) + 1;
     while (pos < end) {
-      int equals_pos = xml.find('=', pos);
+      auto equals_pos = xml.find('=', pos);
       if (equals_pos == std::string::npos || equals_pos >= end)
         break;
       std::string name = xml.substr(pos, equals_pos - pos);
-      int quote_start = xml.find('"', equals_pos) + 1;
-      int quote_end = xml.find('"', quote_start);
+      auto quote_start = xml.find('"', equals_pos) + 1;
+      auto quote_end = xml.find('"', quote_start);
       std::string value = xml.substr(quote_start, quote_end - quote_start);
       attributes[name] = value;
       pos = quote_end + 1;

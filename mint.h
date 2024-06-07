@@ -7,27 +7,25 @@ namespace Render {
 
 class Imprint {
 public:
-  Node pattern;
+  Node pattern_node;
   string output;
   static int export_count;
   static int export_depth;
   std::map<string, int> generation_count;
-  std::map<ProcUnit, string> resolved_symbols;
-  std::map<ProcUnit, string> bound;
-  Imprint(Node pattern) : pattern(pattern) {}
-  Imprint() : pattern(Node()) {}
-  ~Imprint() {}
+  Imprint(Node pattern) : pattern_node(std::move(pattern)) {}
+  Imprint() : pattern_node(Node()) {}
+  ~Imprint() = default;
 
-  string add_depth() {
-    string str = "";
+  static string add_depth() {
+    string str;
     for (int i = 0; i < export_depth; i++) {
-      str = '\t' + str;
+      str += '\t';
     }
     return str;
   }
 
   // TODO: Actually make this work
-  std::map<string, string>
+  static std::map<string, string>
   exportParameterBlocks(Node *pattern, std::map<ProcUnit, void *> parameters) {
     std::map<string, string> exported;
 
@@ -68,36 +66,34 @@ public:
     auto type = get_class(pattern);
     string typeName;
 
-    typeName = type.substr(type.find_last_of(":") + 1);
-
-    std::cout << pattern->RenderID << std::endl;
+    typeName = type.substr(type.find_last_of(':') + 1);
 
     if (generation_count.find(typeName) == generation_count.end())
       generation_count[typeName] = 0;
 
-    if (bound.find(pattern->RenderID) != bound.end()) {
-      resolved_symbols[pattern->RenderID] = bound[pattern->RenderID];
+    if (_bound.find(pattern->RenderID) != _bound.end()) {
+      _resolved_symbols[pattern->RenderID] = _bound[pattern->RenderID];
     } else {
       generation_count[typeName]++;
     }
 
-    if (resolved_symbols.find(pattern->RenderID) == resolved_symbols.end()) {
-      resolved_symbols[pattern->RenderID] =
+    if (_resolved_symbols.find(pattern->RenderID) == _resolved_symbols.end()) {
+      _resolved_symbols[pattern->RenderID] =
           typeName + "_" + std::to_string(generation_count[typeName]);
       generation_count[typeName]++;
     }
 
-    return resolved_symbols[pattern->RenderID];
+    return _resolved_symbols[pattern->RenderID];
   }
 
-  string exportNode(Node *pattern, Node *parent, string export_symbol) {
+  string exportNode(Node *pattern, Node parent[], const string &export_symbol) {
     export_count = 0;
     export_depth = 0;
     export_depth++;
     auto tabSpaces = add_depth();
 
     string symbol;
-    if (export_symbol == "") {
+    if (export_symbol.empty()) {
       symbol = exportNodeSymbol(pattern);
     } else {
       symbol = export_symbol;
@@ -154,6 +150,10 @@ public:
   }
 
   void print() { std::cout << output << std::endl; }
+
+private:
+  std::map<ProcUnit, string> _resolved_symbols;
+  std::map<ProcUnit, string> _bound;
 };
 }; // namespace Render
 } // namespace Approach
